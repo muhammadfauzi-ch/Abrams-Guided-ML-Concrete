@@ -1,0 +1,37 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.env
+.venv/
+
+# Model artifacts
+models/
+outputs/
+*.pkl
+*.joblib
+*.h5
+*.keras
+*.pth
+
+# Dataset
+data/raw/
+data/processed/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CatBoost logs
+catboost_info/
