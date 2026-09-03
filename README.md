@@ -214,16 +214,3 @@ Fauzi, M.; Potiyaraj, P.; Prasittisopin, L.
 *"An Abrams Guided Comparative Machine Learning Framework for Predicting Concrete Compressive Strength Across Multi Source Datasets."*
 
 ---
-
-# Author
-
-Muhammad Fauzi
-PhD Student in Materials Science
-Chulalongkorn University, Thailand
-
-Research interests:
-
-* Physics-guided machine learning
-* Sustainable construction materials
-* Concrete engineering
-* Data-driven materials design
