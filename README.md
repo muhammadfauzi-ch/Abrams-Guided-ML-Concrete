@@ -1,163 +1,153 @@
-# An Abrams-Guided Residual Learning Framework for Concrete Compressive Strength Prediction Across Multi-Source Datasets
+# Effects of Empirical Formulation Development on Abrams-Guided Machine Learning for Concrete Compressive Strength Prediction
 
 ## Overview
 
-This repository provides the reproducible computational workflow for an empirical-prior-guided machine learning framework developed to predict concrete compressive strength across multi-source datasets.
+This repository contains the computational workflow supporting a study of how the development of Abrams-based empirical formulations affects concrete compressive strength prediction and the performance of guided residual machine learning.
 
-Rather than using Abrams-type formulations only as standalone benchmarks, the framework uses them as empirical priors in residual learning. The study examines how **empirical prior complexity, learner behavior, and data-domain coverage** interact in determining predictive performance and model response.
+Three formulations are evaluated, namely Classical Abrams, Abrams with curing age, and a multivariable Abrams-type formulation. The age-incorporated and multivariable formulations are subsequently used as empirical priors in residual learning. The study examines whether improvements in standalone empirical prediction consistently lead to better guided models and how the results change after experimental observations are incorporated into the development domain.
 
-The workflow compares conventional empirical formulations, direct machine learning, and two guided residual-learning schemes based on an age-incorporated Abrams prior and a multivariable Abrams-type prior.
+The manuscript reports conventional multiple linear regression (MLR) as the direct machine learning baseline alongside the empirical formulations and two families of guided residual models. Other learning algorithms are compared under the Abrams-guided and multivariable-guided configurations.
 
 | Component | Description |
 | --- | --- |
-| Primary dataset | 937 observations compiled from 33 published studies |
+| Literature dataset | 937 observations from 33 published studies |
 | Experimental datasets | Exp1 and Exp2 |
-| Pooled experimental dataset | Exp12, combining Exp1 and Exp2 |
-| Target | Concrete compressive strength (MPa) |
-| Empirical hierarchy | Classical Abrams, Abrams with curing age, Multivariable Abrams-type model |
-| Data-driven models | Direct ML and guided residual ML |
-| Interpretation | SHAP, PDP, and ICE analyses |
-| Domain-expansion analysis | Literature + Exp1, Literature + Exp2, and Literature + Exp12 retraining |
+| Combined experimental dataset | Exp12, comprising Exp1 and Exp2 |
+| Prediction target | Concrete compressive strength (MPa) |
+| Empirical formulations | Classical Abrams, Abrams with curing age, Multivariable Abrams-type model |
+| Guided learning | Abrams-guided ML and Multivariable-Abrams-guided ML |
+| Interpretation | SHAP, PDP, ICE, and model-response analysis |
+| Experimental integration | Literature + Exp1, Literature + Exp2, and Literature + Exp12 retraining |
 
 ---
 
-# Research Framework
+## Research Questions
 
-The computational workflow consists of six main stages:
+The study addresses two research questions.
+
+1. How does the development of Abrams-based empirical formulations influence standalone predictive performance and the effectiveness of Abrams-guided machine learning compared with conventional machine learning?
+2. How does the predictive performance of Abrams-guided machine learning change following the separate and combined integration of experimental datasets into the literature-based development domain?
+
+The first question is examined using the literature-only benchmark. The second is examined using separate and combined literature-experimental retraining scenarios. Model interpretation provides supporting evidence for both questions.
+
+---
+
+## Research Framework
+
+The workflow comprises six stages.
 
 | Stage | Description |
 | --- | --- |
-| Data processing | Cleaning, harmonization, feature preparation, and quality control |
-| Modeling | Empirical models, direct ML, and guided residual learning |
-| Evaluation | Performance metrics and comparative assessment |
-| Interpretation | SHAP, PDP, ICE, and response analysis |
-| Retraining | Literature-experimental integration using Exp1, Exp2, and Exp12 |
-| Application | Parametric response analysis and model-guided mixture screening |
-
-The framework is designed to answer three main questions:
-
-1. How much compressive-strength variation can be represented by progressively richer Abrams-type empirical formulations?
-2. Does increasing empirical prior complexity consistently improve residual machine learning?
-3. How does the behavior of the guided models change when the development domain is expanded with experimental data?
+| Data processing | Data cleaning, harmonization, feature preparation, and quality control |
+| Modeling | Empirical formulations, conventional MLR, and guided residual learning |
+| Evaluation | Primary and complementary prediction metrics |
+| Interpretation | SHAP, PDP, ICE, and model-response analyses |
+| Retraining | Separate Exp1 and Exp2 integration and combined Exp12 integration |
+| Application | Parametric response analysis and preliminary mixture screening |
 
 ---
 
-# Dataset
+## Dataset
 
-## Literature Dataset
+### Literature Dataset
 
-The primary dataset contains **937 observations from 33 published experimental studies**. Each observation represents a concrete mixture evaluated at a particular curing age.
+The initial benchmark uses **937 observations collected from 33 published experimental studies**. Each observation represents a concrete mixture and its measured compressive strength at a specified curing age.
 
 | Parameter | Description |
 | --- | --- |
-| Source | 33 published experimental studies |
-| Number of observations | 937 |
-| Main input variables | Age, cement, water, W/B, SCM, fine aggregate, coarse aggregate, superplasticizer, and fiber |
-| Target variable | Concrete compressive strength (MPa) |
+| Source | 33 published studies |
+| Observations | 937 |
+| Main variables | Curing age, cement, water, W/B, supplementary cementitious materials (SCM), fine aggregate, coarse aggregate, superplasticizer, and fiber |
+| Target | Concrete compressive strength (MPa) |
 
-Observations reported for the same mixture at different curing ages were retained separately because each age corresponds to a different compressive-strength response.
+Measurements for the same mixture at different curing ages are retained as separate observations because they correspond to different strength responses.
 
-## Experimental Datasets
+### Experimental Datasets
 
-Two independent experimental datasets were used to examine model adaptation when the development domain was expanded beyond the literature data.
+Two experimental datasets are incorporated into the literature-based development domain, first separately and then together.
 
-| Dataset | Records | Role |
+| Dataset | Observations | Role |
 | --- | ---: | --- |
-| Exp1 | 131 | Separate literature-experimental integration |
-| Exp2 | 397 | Separate literature-experimental integration |
-| Exp12 | 528 | Pooled Exp1 + Exp2 integration |
+| Exp1 | 131 | Separate integration with the literature dataset |
+| Exp2 | 397 | Separate integration with the literature dataset |
+| Exp12 | 528 | Combined Exp1 and Exp2 integration |
 
-The corresponding expanded domains contain:
-
-| Modeling domain | Total observations |
+| Development domain | Total observations |
 | --- | ---: |
 | Literature + Exp1 | 1,068 |
 | Literature + Exp2 | 1,334 |
 | Literature + Exp12 | 1,465 |
 
-These scenarios represent **integrated retraining analyses**, not independent external validation, because the experimental observations are incorporated into model development before evaluation on the held-out portion of each expanded domain.
+**These are integrated retraining analyses, not independent external validation.** Experimental observations are incorporated into model development before the expanded dataset is divided into training and testing subsets.
 
 ---
 
-# Modeling Framework
+## Modeling Framework
 
-## Empirical Model Hierarchy
+### Abrams-Based Empirical Formulations
 
-Three empirical formulations are evaluated progressively:
-
-| Model | Main information represented |
+| Formulation | Information represented |
 | --- | --- |
-| Classical Abrams | W/B |
-| Abrams with curing age | W/B + curing age |
-| Multivariable Abrams-type model | W/B, age, and broader mixture composition |
+| Classical Abrams | Water-to-binder ratio (W/B) |
+| Abrams with curing age | W/B and curing age |
+| Multivariable Abrams-type model | W/B, curing age, and broader mixture composition |
 
-The hierarchy is used to determine how the empirical representation changes as progressively more information is introduced before machine learning.
+The three formulations are compared as standalone empirical predictors. The latter two are also evaluated as empirical priors for machine learning.
 
-## Guided Residual Learning
+### Guided Residual Learning
 
-The age-incorporated Abrams model and the Multivariable Abrams-type model are subsequently used as empirical priors.
-
-For each observation, the residual learning target is defined conceptually as:
+For each observation, the empirical model first estimates compressive strength. The machine learning algorithm then estimates the remaining error:
 
 ```text
 Residual = Measured strength - Empirical prediction
-```
-
-The machine learning model predicts this remaining residual, and the final compressive-strength prediction is reconstructed as:
-
-```text
 Final prediction = Empirical prediction + Predicted residual
 ```
 
-Using the same learners with two empirical priors enables the effect of **prior complexity** to be evaluated without changing the residual-learning structure.
+The two guided schemes use the same residual-learning concept but different empirical formulations:
+
+- **Abrams-guided ML:** uses the Abrams formulation incorporating curing age.
+- **Multivariable-Abrams-guided ML:** uses the multivariable Abrams-type formulation.
+
+This comparison evaluates whether a more accurate standalone empirical formulation also provides a more effective prior for residual learning. The reported comparisons should be interpreted in the context of their respective evaluation subsets.
 
 ---
 
-# Machine Learning Models
+## Machine Learning Models
 
-The following learners are evaluated:
+The modeling workflow includes the following learning algorithms.
 
-| Model | Category |
+| Algorithm | Learning approach |
 | --- | --- |
-| MLR | Linear regression |
-| SVR | Kernel-based regression |
-| KNN | Instance-based learning |
-| RF | Bagging tree ensemble |
-| GBR | Gradient boosting |
+| MLR | Multiple linear regression |
+| SVR | Support vector regression |
+| KNN | K-nearest neighbors |
+| RF | Random forest |
+| GBR | Gradient boosting regression |
 | XGBoost | Extreme gradient boosting |
 | CatBoost | Gradient boosting |
 | DNN | Deep neural network |
 | AutoGluon | Automated machine learning |
 
-The same learning families are used where applicable for direct ML and empirical-prior-guided residual learning to enable consistent comparison.
+In the manuscript's main literature-only comparison, **MLR** is reported as the conventional direct ML baseline. The other algorithms are reported in the two guided configurations, using model names such as `Abrams-SVR`, `Multivariable-Abrams-SVR`, `Abrams-XGBoost`, and `Multivariable-Abrams-XGBoost`. This distinction avoids treating guided models as conventional ML-only results.
 
 ---
 
-# Experimental Design
+## Experimental Design
 
-## Literature-Only Benchmark
+### Literature-Only Benchmark
 
-The 937 literature observations are divided into training and testing subsets using a fixed 80:20 partition.
+The initial analysis uses 937 literature observations and an 80:20 training-testing split. It evaluates:
 
-This stage compares:
+1. Standalone Classical Abrams, Abrams with curing age, and Multivariable Abrams-type formulations.
+2. Conventional MLR as the direct baseline reported in the manuscript.
+3. Abrams-guided residual learning.
+4. Multivariable-Abrams-guided residual learning.
 
-```text
-Empirical models
-        ↓
-Direct machine learning
-        ↓
-Abrams-guided residual learning
-        ↓
-Multivariable-guided residual learning
-```
+The objective is to compare the three empirical formulations and evaluate how the selection of an empirical prior affects guided prediction across learning algorithms.
 
-The objective is to determine how predictive performance changes as empirical information is introduced before machine learning.
+### Literature-Experimental Retraining
 
-## Literature-Experimental Retraining
-
-The second stage evaluates model adaptation after experimental observations are incorporated into the development domain.
-
-Three expanded domains are considered:
+The second analysis retrains models using three expanded development domains:
 
 ```text
 Literature + Exp1
@@ -165,109 +155,115 @@ Literature + Exp2
 Literature + Exp12
 ```
 
-Each expanded dataset is repartitioned into training and held-out testing subsets before the model families are refitted.
-
-This analysis evaluates whether the benefit of empirical guidance and residual learning changes as the available data domain becomes broader.
+Each integrated dataset is divided into training and testing subsets for the corresponding retraining analysis. Results show **within-domain adaptation following experimental data integration**. Comparisons across these domains are not independent source-held-out external validation.
 
 ---
 
-# Model Evaluation
+## Model Evaluation
 
-Model performance is evaluated using complementary metrics:
+The following complementary metrics are reported.
 
-| Metric | Purpose |
+| Metric | Interpretation |
 | --- | --- |
-| R² | Explained variance |
-| RMSE | Absolute prediction error with greater penalty for large errors |
-| MAE | Mean absolute prediction error |
-| MBE | Directional prediction bias |
-| MAPE | Relative prediction error |
-| RRMSE | Error normalized by mean compressive strength |
-| A20 | Fraction of predictions within ±20% of measured strength |
+| R² | Coefficient of determination |
+| RMSE | Root mean squared error, emphasizing larger absolute errors |
+| MAE | Mean absolute error |
+| MBE | Mean bias error |
+| MAPE | Mean absolute percentage error |
+| RRMSE | Relative root mean squared error |
+| A20 | Fraction of predictions within ±20% of the measured strength |
+
+Model comparisons consider multiple metrics rather than relying on R² alone.
+
+### Main Reported Findings
+
+**Literature-only benchmark.** Standalone test R² increased from 0.5060 for Classical Abrams to 0.8271 for Abrams with curing age and 0.8847 for the multivariable formulation. The two leading guided configurations were **Abrams-AutoGluon**, which achieved test R² = 0.9731 and RMSE = 4.79 MPa, and **Multivariable-Abrams-AutoGluon**, which achieved R² = 0.9719 and RMSE = 4.89 MPa and showed small advantages in some complementary error metrics.
+
+**Combined experimental integration.** After Exp12 retraining, **Abrams-XGBoost** achieved test R² = 0.9830, RMSE = 3.71 MPa, and MAE = 2.45 MPa. **Multivariable-Abrams-XGBoost** followed closely, with R² = 0.9820 and RMSE = 3.82 MPa.
+
+The central finding is that **better standalone empirical prediction does not necessarily lead to better guided residual learning**. The preferred guided configuration depends on the empirical formulation, learning algorithm, and development data domain.
 
 ---
 
-# Model Interpretation
+## Model Interpretation
 
-Interpretability analyses are used to examine not only which variables influence the predictions, but also how the learned response changes with empirical prior complexity and data-domain expansion.
+Interpretation is used to examine the material relevance of the learned relationships and how these relationships change with empirical formulation and experimental data integration. The workflow includes:
 
-The workflow includes:
-
-- SHAP global feature importance
-- SHAP summary analysis
+- SHAP global feature importance and summary analysis
 - SHAP dependence analysis
-- Partial dependence plots
-- Individual conditional expectation analysis
-- Parametric response analysis
+- Partial dependence plots (PDP)
+- Individual conditional expectation (ICE) analysis
+- Parametric model-response analysis
 
-Particular attention is given to curing age and W/B because they provide a connection between the learned model behavior and established concrete-strength relationships.
+Particular attention is given to W/B and curing age. Their learned response patterns are interpreted alongside established concrete strength mechanisms involving capillary porosity, cement hydration, and calcium silicate hydrate (C-S-H) formation. SHAP values describe model attribution, **not direct causal or microstructural measurements**.
 
 ---
 
-# Environment Setup
+## Environment Setup
 
-## Requirements
+### Requirements
 
 - Python 3.11
 - Conda
 - Windows or Linux
 - GPU optional for computationally intensive DNN or AutoML training
 
-Create the environment using:
+Create and activate the environment:
 
 ```bash
 conda env create -f environment.yml
 conda activate abrams-ml
 ```
 
-If required:
+If required, install additional dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-# Core Dependencies
+### Core Dependencies
 
 | Package | Purpose |
 | --- | --- |
 | NumPy | Numerical computation |
-| Pandas | Dataset manipulation |
+| Pandas | Data processing |
 | Scikit-learn | Classical machine learning |
 | XGBoost | Gradient boosting |
 | CatBoost | Gradient boosting |
-| PyTorch | Deep neural network |
+| PyTorch | Deep neural networks |
 | AutoGluon | Automated machine learning |
 | SHAP | Model interpretation |
 | Matplotlib | Visualization |
 | Seaborn | Statistical visualization |
 
-Exact package versions are provided in `environment.yml` and/or `requirements.txt`.
+Package versions and installation details should follow the files supplied in the repository.
 
 ---
 
-# Reproducibility Workflow
+## Reproducibility Workflow
 
-The repository follows the existing script structure:
+The project organizes its scripts by research stage:
 
 ```text
 scripts/
-│
-├── 01_data_processing/
-│   └── Data cleaning, harmonization, and dataset preparation
-│
-├── 02_modeling/
-│   └── Empirical models, direct ML, and guided residual-learning models
-│
-├── 03_evaluation/
-│   └── Performance metrics and comparative model assessment
-│
-├── 04_interpretation/
-│   └── SHAP, PDP, ICE, and model-response interpretation
-│
-├── 05_retraining/
-│   └── Literature-Exp1, Literature-Exp2, and Literature-Exp12 retraining
-│
-└── 06_application/
-    └── Parametric response analysis and model-guided mixture screening
+|
+|-- 01_data_processing/
+|   `-- Data cleaning, harmonization, and dataset preparation
+|
+|-- 02_modeling/
+|   `-- Empirical formulations, conventional MLR, and guided residual models
+|
+|-- 03_evaluation/
+|   `-- Performance metrics and comparative evaluation
+|
+|-- 04_interpretation/
+|   `-- SHAP, PDP, ICE, and response interpretation
+|
+|-- 05_retraining/
+|   `-- Literature-Exp1, Literature-Exp2, and Literature-Exp12 retraining
+|
+`-- 06_application/
+    `-- Parametric response analysis and preliminary mixture screening
+```
+
+The interpretation and screening outputs are supporting analyses. The study's two central questions concern empirical formulation development and the effect of experimental data integration on guided prediction.
